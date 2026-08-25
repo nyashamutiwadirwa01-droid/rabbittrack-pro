@@ -1,0 +1,21 @@
+<svg width="1024" height="1024" viewBox="0 0 1024 1024" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1024" y2="1024" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#22c55e"/>
+      <stop offset="1" stop-color="#15803d"/>
+    </linearGradient>
+  </defs>
+  <!-- Background: filled square (Capacitor/Android adaptive-icon tooling masks this into
+       a circle/squircle/rounded-square automatically per launcher, so we keep the source
+       full-bleed and let that tooling do the shaping). -->
+  <rect width="1024" height="1024" fill="url(#bg)"/>
+
+  <!-- Mark: a minimal, geometric twin-ear rabbit silhouette, kept inside the ~66% safe
+       zone so nothing gets clipped by adaptive-icon masking. Pure shapes, no gradients
+       or fine detail, so it stays crisp and readable all the way down to 48px. -->
+  <g fill="#ffffff">
+    <rect x="372" y="140" width="120" height="360" rx="60" transform="rotate(-10 432 320)"/>
+    <rect x="532" y="140" width="120" height="360" rx="60" transform="rotate(10 592 320)"/>
+    <circle cx="512" cy="640" r="230"/>
+  </g>
+</svg>
