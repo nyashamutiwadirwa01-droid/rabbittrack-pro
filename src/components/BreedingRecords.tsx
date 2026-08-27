@@ -35,6 +35,7 @@ export function BreedingRecords({ open, onClose, doe, records, onSaved }: Props)
   const [editingId, setEditingId] = useState<string | null>(null);
   const [creating, setCreating] = useState(false);
   const [draft, setDraft] = useState<Partial<BreedingRecord>>(emptyRecord(''));
+  const [manualDates, setManualDates] = useState<Set<keyof BreedingRecord>>(new Set());
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
@@ -46,30 +47,40 @@ export function BreedingRecords({ open, onClose, doe, records, onSaved }: Props)
 
   const startCreate = () => {
     setDraft(emptyRecord(doe.id));
+    setManualDates(new Set());
     setCreating(true);
     setEditingId(null);
   };
   const startEdit = (r: BreedingRecord) => {
     setDraft({ ...r });
+    // Existing records are treated as user-owned data; editing one must never
+    // replace its saved dates with newly calculated defaults.
+    setManualDates(new Set(['mating_date', 'nesting_box_date', 'kindling_date', 'remating_date', 'weaning_date']));
     setEditingId(r.id);
     setCreating(false);
   };
 
   const set = (k: keyof BreedingRecord, v: string | number | null) => setDraft((p) => ({ ...p, [k]: v }));
 
-  // Auto-calc helper: when mating date set, fill nesting/kindling
+  const setDate = (k: keyof BreedingRecord, v: string) => {
+    setManualDates((previous) => new Set(previous).add(k));
+    set(k, v);
+  };
+
   const autoCalc = (mating: string) => {
-    const newDraft = { ...draft, mating_date: mating };
-    if (mating) {
-      newDraft.nesting_box_date = calcNestingBox(mating);
-      newDraft.kindling_date = calcKindling(mating);
-      const k = newDraft.kindling_date;
-      if (k) {
-        newDraft.weaning_date = calcWeaning(k);
-        newDraft.remating_date = calcRemating(k);
+    setDraft((previous) => {
+      const next = { ...previous, mating_date: mating };
+      if (mating) {
+        if (!manualDates.has('nesting_box_date')) next.nesting_box_date = calcNestingBox(mating);
+        if (!manualDates.has('kindling_date')) next.kindling_date = calcKindling(mating);
+        const kindling = next.kindling_date;
+        if (kindling) {
+          if (!manualDates.has('weaning_date')) next.weaning_date = calcWeaning(kindling);
+          if (!manualDates.has('remating_date')) next.remating_date = calcRemating(kindling);
+        }
       }
-    }
-    setDraft(newDraft);
+      return next;
+    });
   };
 
   const save = async () => {
@@ -140,6 +151,7 @@ export function BreedingRecords({ open, onClose, doe, records, onSaved }: Props)
         <BreedingForm
           draft={draft}
           set={set}
+          setDate={setDate}
           autoCalc={autoCalc}
           onSave={save}
           onCancel={() => { setCreating(false); setEditingId(null); }}
@@ -196,10 +208,11 @@ function Field({ icon: Icon, label, value }: { icon: typeof Heart; label: string
 }
 
 function BreedingForm({
-  draft, set, autoCalc, onSave, onCancel, loading, isEdit,
+  draft, set, setDate, autoCalc, onSave, onCancel, loading, isEdit,
 }: {
   draft: Partial<BreedingRecord>;
   set: (k: keyof BreedingRecord, v: string | number | null) => void;
+  setDate: (k: keyof BreedingRecord, v: string) => void;
   autoCalc: (mating: string) => void;
   onSave: () => void;
   onCancel: () => void;
@@ -210,26 +223,11 @@ function BreedingForm({
   const today = new Date().toISOString().slice(0, 10);
   const computedDeaths = Math.max(0, (Number(draft.kits_born) || 0) - (Number(draft.kits_alive) || 0));
 
-  // When Kits Alive changes, keep Weaners Count matching it automatically —
-  // unless the user has already customized Weaners Count away from the old value.
-  const onKitsAliveChange = (v: string) => {
-    const newAlive = v === '' ? 0 : Number(v);
-    const prevAlive = Number(draft.kits_alive) || 0;
-    setDraft((p) => {
-      const weanersMatchesOld = (Number(p.weaners_count) || 0) === prevAlive;
-      return {
-        ...p,
-        kits_alive: newAlive,
-        weaners_count: weanersMatchesOld ? newAlive : p.weaners_count,
-      };
-    });
-  };
-
   return (
     <div className="rounded-xl border border-brand-200 dark:border-brand-800 bg-brand-50/40 dark:bg-brand-950/20 p-4 space-y-4 animate-fade-up">
       <div className="flex items-center gap-2 text-sm font-semibold text-brand-700 dark:text-brand-300">
         <Calculator size={16} /> {isEdit ? 'Edit breeding cycle' : 'New breeding cycle'}
-        <span className="text-xs font-normal text-slate-500 ml-1">Enter mating date, then click auto-calc</span>
+        <span className="text-xs font-normal text-slate-500 ml-1">Dates auto-fill as editable defaults</span>
       </div>
       <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
         <div>
@@ -238,11 +236,11 @@ function BreedingForm({
         </div>
         <div>
           <label className="label">Nesting Box Date</label>
-          <input type="date" className="input" value={draft.nesting_box_date || ''} onChange={(e) => set('nesting_box_date', e.target.value)} />
+          <input type="date" className="input" value={draft.nesting_box_date || ''} onChange={(e) => setDate('nesting_box_date', e.target.value)} />
         </div>
         <div>
           <label className="label">Kindling Date</label>
-          <input type="date" className="input" value={draft.kindling_date || ''} onChange={(e) => set('kindling_date', e.target.value)} />
+          <input type="date" className="input" value={draft.kindling_date || ''} onChange={(e) => setDate('kindling_date', e.target.value)} />
         </div>
         <div>
           <label className="label">Kits Born</label>
@@ -250,7 +248,7 @@ function BreedingForm({
         </div>
         <div>
           <label className="label">Kits Alive</label>
-          <input type="number" min="0" className="input" value={draft.kits_alive ?? 0} onChange={(e) => onKitsAliveChange(e.target.value)} />
+          <input type="number" min="0" className="input" value={draft.kits_alive ?? 0} onChange={(e) => num('kits_alive')(e.target.value)} />
         </div>
         <div>
           <label className="label">Deaths</label>
@@ -263,18 +261,17 @@ function BreedingForm({
         </div>
         <div>
           <label className="label">Weaning Date</label>
-          <input type="date" className="input" value={draft.weaning_date || ''} onChange={(e) => set('weaning_date', e.target.value)} />
+          <input type="date" className="input" value={draft.weaning_date || ''} onChange={(e) => setDate('weaning_date', e.target.value)} />
         </div>
         <div>
           <label className="label">Remating Date</label>
-          <input type="date" className="input" value={draft.remating_date || ''} onChange={(e) => set('remating_date', e.target.value)} />
+          <input type="date" className="input" value={draft.remating_date || ''} onChange={(e) => setDate('remating_date', e.target.value)} />
         </div>
         <div>
           <label className="label">Weaners Count</label>
           <input type="number" min="0" className="input" value={draft.weaners_count ?? 0} onChange={(e) => num('weaners_count')(e.target.value)} />
         </div>
-        <p className="col-span-2 sm:col-span-3 -mt-1 text-xs text-slate-400">Weaners Count auto-fills from Kits Alive — adjust it if any kits were lost before weaning.</p>
-      </div>
+        </div>
       <div>
         <label className="label">Weaners Transferred To</label>
         <input className="input" value={draft.weaners_transferred_to || ''} onChange={(e) => set('weaners_transferred_to', e.target.value)} placeholder="e.g. Grow-out pen A" />
