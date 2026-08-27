@@ -4,7 +4,7 @@ import { toast } from './Toast';
 import { createBreedingRecord, updateBreedingRecord, deleteBreedingRecord } from '../lib/api';
 import type { Rabbit, BreedingRecord } from '../types';
 import {
-  Heart, Egg, Baby, RefreshCw, Calendar, Plus, Trash2, Save, X, Calculator,
+  Heart, Egg, Baby, RefreshCw, Calendar, Plus, Trash2, Pencil, X, Calculator,
 } from 'lucide-react';
 import { calcNestingBox, calcKindling, calcWeaning, calcRemating, formatDate } from '../lib/breeding';
 
@@ -180,8 +180,8 @@ export function BreedingRecords({ open, onClose, doe, records, onSaved }: Props)
                   <Field icon={Egg} label="Weaners" value={String(r.weaners_count)} />
                 </div>
                 <div className="flex gap-1">
-                  <button onClick={() => startEdit(r)} className="btn-ghost h-8 w-8 !p-0" title="Edit"><Save size={14} /></button>
-                  <button onClick={() => remove(r.id)} className="btn-ghost h-8 w-8 !p-0 text-rose-500 hover:bg-rose-50" title="Delete"><Trash2 size={14} /></button>
+                  <button type="button" onClick={() => startEdit(r)} className="btn-ghost h-8 w-8 !p-0" title="Edit breeding cycle" aria-label={`Edit breeding cycle for ${doe.name || doe.rabbit_id}`}><Pencil size={14} /></button>
+                  <button type="button" onClick={() => remove(r.id)} className="btn-ghost h-8 w-8 !p-0 text-rose-500 hover:bg-rose-50" title="Delete breeding cycle" aria-label={`Delete breeding cycle for ${doe.name || doe.rabbit_id}`}><Trash2 size={14} /></button>
                 </div>
               </div>
               {r.weaners_transferred_to && (
