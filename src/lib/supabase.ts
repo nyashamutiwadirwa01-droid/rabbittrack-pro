@@ -1,11 +1,11 @@
 import { createClient } from '@supabase/supabase-js';
 
-const supabaseUrl = import.meta.env.VITE_SUPABASE_URL as string;
-const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY as string;
-
-if (!supabaseUrl || !supabaseAnonKey) {
-  throw new Error('Missing Supabase env vars. Check .env for VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY.');
-}
+// These are public Supabase client values. Environment variables remain preferred,
+// while the fallback keeps static Cloudflare builds from failing before React mounts.
+const supabaseUrl = (import.meta.env.VITE_SUPABASE_URL as string | undefined)
+  || 'https://xdzekgbbvkoswqvnmbxr.supabase.co';
+const supabaseAnonKey = (import.meta.env.VITE_SUPABASE_ANON_KEY as string | undefined)
+  || 'sb_publishable_Mlkr4Nevda3OyLPyta_fhA_94ng1nlp';
 
 const REMEMBER_KEY = 'rabbittrack-remember-me';
 
