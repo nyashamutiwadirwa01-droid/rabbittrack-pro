@@ -24,7 +24,7 @@ function authStorage(): Storage {
 // Supabase Auth stores its session through this adapter. The checkbox controls
 // whether the session goes into localStorage (survives browser restart) or
 // sessionStorage (removed when the tab/browser session ends).
-const storage: Storage = {
+const storage: Pick<Storage, 'getItem' | 'setItem' | 'removeItem'> = {
   getItem: (key) => authStorage().getItem(key),
   setItem: (key, value) => authStorage().setItem(key, value),
   removeItem: (key) => authStorage().removeItem(key),

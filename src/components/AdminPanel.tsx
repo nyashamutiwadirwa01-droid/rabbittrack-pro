@@ -1,9 +1,8 @@
 import { useState, useEffect, useCallback } from 'react';
 import {
-  Shield, Users, Clock, Crown, Ban, CheckCircle2, XCircle, Search,
-  RefreshCw, FileText as FileTextIcon, ScrollText, ChevronLeft, KeyRound, Copy, Plus,
+  Shield, Users, Clock, Crown, Ban, CheckCircle2, Search,
+  ScrollText, ChevronLeft, KeyRound, Copy, Plus,
 } from 'lucide-react';
-import { useAuth } from '../lib/auth';
 import { toast } from './Toast';
 import type { AdminStats, AdminRevenueStats, AdminPaymentSubmission, AuditLogEntry, Profile, FamilyCode } from '../types';
 import {

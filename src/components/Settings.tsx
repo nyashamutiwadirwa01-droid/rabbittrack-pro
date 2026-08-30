@@ -1,7 +1,7 @@
 import { useState, useRef } from 'react';
 import {
   Moon, Sun, Database, Download, Upload, FileText, FileSpreadsheet,
-  Shield, User, LogOut, Sparkles, Check, AlertTriangle, Crown,
+  Shield, User, LogOut, Sparkles, Check, AlertTriangle,
   Link as LinkIcon, Mail, ShieldCheck as ShieldIcon, KeyRound, Lock,
 } from 'lucide-react';
 import { useTheme } from '../lib/theme';
