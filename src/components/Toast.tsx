@@ -34,7 +34,7 @@ export function ToastHost() {
       {toasts.map((t) => (
         <div key={t.id} className="card px-4 py-3 flex items-start gap-3 animate-slide-in shadow-lift">
           <div className="mt-0.5">{icons[t.type]}</div>
-          <p className="text-sm text-slate-700 dark:text-slate-200 flex-1">{t.message}</p>
+          <p className="text-sm text-slate-700 dark:text-slate-200 flex-1 min-w-0 break-words">{t.message}</p>
           <button onClick={() => setToasts((p) => p.filter((x) => x.id !== t.id))} className="text-slate-400 hover:text-slate-600">
             <X size={16} />
           </button>

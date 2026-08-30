@@ -78,6 +78,16 @@ export function BreedingRecords({ open, onClose, doe, records, onSaved }: Props)
           if (!manualDates.has('weaning_date')) next.weaning_date = calcWeaning(kindling);
           if (!manualDates.has('remating_date')) next.remating_date = calcRemating(kindling);
         }
+      } else {
+        // Mating date was cleared. Any downstream date that was only ever
+        // auto-calculated (never manually overridden) is now based on
+        // nothing and must be cleared too — otherwise a stale kindling/
+        // weaning/remating date lingers and can still trigger alerts even
+        // though there's no mating date behind it anymore.
+        if (!manualDates.has('nesting_box_date')) next.nesting_box_date = null;
+        if (!manualDates.has('kindling_date')) next.kindling_date = null;
+        if (!manualDates.has('weaning_date')) next.weaning_date = null;
+        if (!manualDates.has('remating_date')) next.remating_date = null;
       }
       return next;
     });

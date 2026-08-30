@@ -114,12 +114,19 @@ export function generateAlerts(records: BreedingRecord[], doeMap: Map<string, st
 
   for (const r of records) {
     const doeName = doeMap.get(r.doe_id) || 'Unknown Doe';
-    // Today's kindlings (skip if birth data already entered — already done)
-    if (r.kindling_date === today && (r.kits_born || 0) === 0) {
+    // Today's kindlings (skip if birth data already entered — already done).
+    // Requires mating_date to still be set: kindling_date is only ever a
+    // value derived from mating_date, so if mating_date has been cleared
+    // (e.g. record edited/corrected) a leftover kindling_date must not
+    // still trigger an alert.
+    if (r.mating_date && r.kindling_date === today && (r.kits_born || 0) === 0) {
       alerts.push({ id: `${r.id}-tk`, type: 'kindling', doeName, date: today, message: `${doeName} is due to kindle today`, severity: 'info' });
     }
-    // Today's weanings (skip if weaners already recorded — already done)
-    if (r.weaning_date === today && (r.weaners_count || 0) === 0) {
+    // Today's weanings (skip if weaners already recorded — already done).
+    // Same reasoning: weaning_date is derived from kindling_date which is
+    // derived from mating_date, so require both upstream dates to still
+    // be present before trusting a leftover weaning_date.
+    if (r.mating_date && r.kindling_date && r.weaning_date === today && (r.weaners_count || 0) === 0) {
       alerts.push({ id: `${r.id}-tw`, type: 'weaning', doeName, date: today, message: `${doeName} is due for weaning today`, severity: 'info' });
     }
     // Today's mating
