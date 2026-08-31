@@ -69,7 +69,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const { error } = await supabase.auth.signUp({
       email,
       password,
-      options: { data: { full_name: fullName } },
+      options: {
+        data: { full_name: fullName },
+        // Explicitly use the current deployed origin instead of Supabase's
+        // dashboard Site URL, which may still point at localhost.
+        emailRedirectTo: `${window.location.origin}/auth?mode=verified`,
+      },
     });
     if (error) return { error: error.message };
     // Note: a Family Access code is redeemed separately, server-side, via

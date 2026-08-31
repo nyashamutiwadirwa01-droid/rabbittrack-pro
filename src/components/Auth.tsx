@@ -2,7 +2,6 @@ import { useState, useEffect } from 'react';
 import { useLocation, useNavigate, Link } from 'react-router-dom';
 import { Mail, Lock, User, Eye, EyeOff, ArrowLeft, Check, Users, Sparkles } from 'lucide-react';
 import { useAuth } from '../lib/auth';
-import { redeemFamilyCode } from '../lib/api';
 import { Wordmark } from './Logo';
 import { toast } from './Toast';
 
@@ -11,7 +10,7 @@ type Mode = 'login' | 'signup' | 'reset';
 export function Auth() {
   const location = useLocation();
   const navigate = useNavigate();
-  const { signIn, signUp, resetPassword } = useAuth();
+  const { signIn, signUp, resetPassword, user } = useAuth();
   const initialMode = (location.state as { mode?: Mode } | null)?.mode === 'signup' ? 'signup' : 'login';
   const [mode, setMode] = useState<Mode>(initialMode);
   const [email, setEmail] = useState('');
@@ -21,6 +20,8 @@ export function Auth() {
   const [showPass, setShowPass] = useState(false);
   const [loading, setLoading] = useState(false);
   const [resetSent, setResetSent] = useState(false);
+  const [confirmationSent, setConfirmationSent] = useState(false);
+  const verifiedCallback = new URLSearchParams(location.search).get('mode') === 'verified';
   // A code entered on the landing page (before signing up) is remembered here
   // and only actually checked server-side once the account exists — the
   // browser never decides on its own whether a code is valid.
@@ -43,21 +44,8 @@ export function Auth() {
         if (password.length < 6) { toast('error', 'Password must be at least 6 characters.'); setLoading(false); return; }
         const { error } = await signUp(email, password, fullName);
         if (error) { toast('error', error); setLoading(false); return; }
-        if (pendingFamilyCode) {
-          // Sign in first so the redemption call is authenticated, then
-          // validate the code for real, server-side.
-          await signIn(email, password, remember);
-          try {
-            const result = await redeemFamilyCode(pendingFamilyCode);
-            toast(result.success ? 'success' : 'error', result.success ? 'Account created — Family Access unlocked!' : `Account created, but: ${result.message}`);
-          } catch {
-            toast('success', 'Account created!');
-          }
-          sessionStorage.removeItem('rtp-family-code');
-        } else {
-          toast('success', 'Account created!');
-        }
-        navigate('/app');
+        setConfirmationSent(true);
+        toast('success', 'Check your email to verify your RabbitTrack Pro account.');
       } else if (mode === 'reset') {
         const { error } = await resetPassword(email);
         if (error) toast('error', error);
@@ -91,7 +79,21 @@ export function Auth() {
               </div>
             )}
 
-            {resetSent ? (
+            {verifiedCallback ? (
+              <div className="mt-6 rounded-xl bg-brand-50 dark:bg-brand-950/40 border border-brand-200 dark:border-brand-800 p-4 text-center">
+                <Check size={28} className="mx-auto text-brand-600" />
+                <p className="mt-2 font-semibold text-slate-900 dark:text-white">Email verified successfully</p>
+                <p className="mt-1 text-sm text-slate-600 dark:text-slate-300">Your RabbitTrack Pro account is verified{user?.email ? ` for ${user.email}` : ''}. You can now log in and manage your herd.</p>
+                <button onClick={() => { setMode('login'); navigate('/auth', { replace: true, state: { mode: 'login' } }); }} className="btn-primary mt-4 px-5 py-2 text-sm">Continue to RabbitTrack Pro</button>
+              </div>
+            ) : confirmationSent ? (
+              <div className="mt-6 rounded-xl bg-brand-50 dark:bg-brand-950/40 border border-brand-200 dark:border-brand-800 p-4 text-center">
+                <Mail size={28} className="mx-auto text-brand-600" />
+                <p className="mt-2 font-semibold text-slate-900 dark:text-white">Check your email to verify your account</p>
+                <p className="mt-1 text-sm text-slate-600 dark:text-slate-300">RabbitTrack Pro sent a confirmation link to <strong>{email}</strong>. Open it to verify your email, then return here and log in.</p>
+                <button onClick={() => { setConfirmationSent(false); setMode('login'); }} className="btn-secondary mt-4 px-4 py-2 text-sm">Go to login</button>
+              </div>
+            ) : resetSent ? (
               <div className="mt-6 rounded-xl bg-brand-50 dark:bg-brand-950/40 border border-brand-200 dark:border-brand-800 p-4 text-center">
                 <Check size={24} className="mx-auto text-brand-600" />
                 <p className="mt-2 text-sm text-slate-700 dark:text-slate-200">Check your email for a reset link.</p>
@@ -144,7 +146,7 @@ export function Auth() {
               </form>
             )}
 
-            {mode !== 'reset' && !resetSent && (
+            {mode !== 'reset' && !resetSent && !confirmationSent && !verifiedCallback && (
               <div className="mt-5 text-center text-sm text-slate-500 dark:text-slate-400">
                 {mode === 'login' ? (
                   <>Don't have an account? <button onClick={() => setMode('signup')} className="text-brand-600 hover:text-brand-700 font-semibold">Sign up</button></>
