@@ -145,9 +145,16 @@ export function Dashboard() {
             </div>
             <span className="badge w-fit bg-rose-100 text-rose-700 dark:bg-rose-900/40 dark:text-rose-300">{alerts.length} active alert{alerts.length !== 1 ? 's' : ''}</span>
           </div>
-          <div className="grid min-w-0 gap-2.5 sm:grid-cols-2 lg:grid-cols-3">
-            {alerts.slice(0, 6).map((a) => <AlertBadge key={a.id} alerts={[a]} />)}
+          <div className="grid min-w-0 grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-3">
+            {alerts.slice(0, 6).map((a) => (
+              <div key={a.id} className="min-w-0">
+                <AlertBadge alerts={[a]} />
+              </div>
+            ))}
           </div>
+          {alerts.length > 6 && (
+            <p className="mt-2 text-xs text-slate-400">+{alerts.length - 6} more — open Alerts to see all</p>
+          )}
         </section>
       )}
 
