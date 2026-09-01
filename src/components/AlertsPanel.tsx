@@ -50,15 +50,13 @@ export function AlertBadge({ alerts }: { alerts: AlertItem[] }) {
   const top = alerts[0];
   const c = config[top.type];
   return (
-    <div className={`flex min-w-0 items-start gap-2.5 rounded-xl ${c.bg} px-3 py-2.5`}>
-      <c.icon size={16} className={`${c.color} mt-0.5 shrink-0`} />
-      <div className="min-w-0 flex-1">
-        <div className="flex flex-wrap items-center gap-x-1.5 gap-y-0.5">
-          <span className={`text-[11px] font-semibold uppercase tracking-wide ${c.color}`}>{c.label}</span>
-          <span className="text-[11px] text-slate-400">· {formatDate(top.date)}</span>
-        </div>
-        <p className="mt-0.5 break-words whitespace-normal text-sm leading-5 text-slate-700 dark:text-slate-200">{top.message}</p>
-      </div>
+    <div
+      className={`flex min-w-0 w-full items-center gap-2 rounded-xl ${c.bg} px-3 py-2`}
+      title={top.message}
+    >
+      <c.icon size={16} className={`${c.color} shrink-0`} />
+      <span className="min-w-0 flex-1 truncate text-sm text-slate-700 dark:text-slate-200">{top.message}</span>
+      <span className="shrink-0 text-[11px] text-slate-400 hidden sm:inline">{formatDate(top.date)}</span>
     </div>
   );
 }
