@@ -22,6 +22,7 @@ export function Auth() {
   const [resetSent, setResetSent] = useState(false);
   const [confirmationSent, setConfirmationSent] = useState(false);
   const verifiedCallback = new URLSearchParams(location.search).get('mode') === 'verified';
+  const verificationConfirmed = verifiedCallback && Boolean(user?.email_confirmed_at);
   // A code entered on the landing page (before signing up) is remembered here
   // and only actually checked server-side once the account exists — the
   // browser never decides on its own whether a code is valid.
@@ -79,12 +80,19 @@ export function Auth() {
               </div>
             )}
 
-            {verifiedCallback ? (
+            {verificationConfirmed ? (
               <div className="mt-6 rounded-xl bg-brand-50 dark:bg-brand-950/40 border border-brand-200 dark:border-brand-800 p-4 text-center">
                 <Check size={28} className="mx-auto text-brand-600" />
                 <p className="mt-2 font-semibold text-slate-900 dark:text-white">Email verified successfully</p>
                 <p className="mt-1 text-sm text-slate-600 dark:text-slate-300">Your RabbitTrack Pro account is verified{user?.email ? ` for ${user.email}` : ''}. You can now log in and manage your herd.</p>
                 <button onClick={() => { setMode('login'); navigate('/auth', { replace: true, state: { mode: 'login' } }); }} className="btn-primary mt-4 px-5 py-2 text-sm">Continue to RabbitTrack Pro</button>
+              </div>
+            ) : verifiedCallback ? (
+              <div className="mt-6 rounded-xl bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800 p-4 text-center">
+                <Mail size={28} className="mx-auto text-amber-600" />
+                <p className="mt-2 font-semibold text-slate-900 dark:text-white">We could not confirm this email yet</p>
+                <p className="mt-1 text-sm text-slate-600 dark:text-slate-300">The verification link may be expired, already used, or the confirmation session is still loading. Try the link again, then return to RabbitTrack Pro and log in.</p>
+                <button onClick={() => { setMode('login'); navigate('/auth', { replace: true, state: { mode: 'login' } }); }} className="btn-secondary mt-4 px-4 py-2 text-sm">Go to login</button>
               </div>
             ) : confirmationSent ? (
               <div className="mt-6 rounded-xl bg-brand-50 dark:bg-brand-950/40 border border-brand-200 dark:border-brand-800 p-4 text-center">
