@@ -27,14 +27,14 @@ export function AlertsPanel({ open, onClose, alerts }: { open: boolean; onClose:
           {alerts.map((a) => {
             const c = config[a.type];
             return (
-              <div key={a.id} className={`flex items-start gap-3 rounded-xl ${c.bg} px-4 py-3`}>
+              <div key={a.id} className={`flex min-w-0 items-start gap-3 rounded-xl ${c.bg} px-3.5 py-3 sm:px-4`}>
                 <c.icon size={18} className={`${c.color} mt-0.5 shrink-0`} />
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-2">
+                <div className="min-w-0 flex-1">
+                  <div className="flex flex-wrap items-center gap-x-2 gap-y-0.5">
                     <span className={`text-xs font-semibold ${c.color}`}>{c.label}</span>
-                    <span className="text-xs text-slate-400">· {formatDate(a.date)}</span>
+                    <span className="text-xs text-slate-400">Due {formatDate(a.date)}</span>
                   </div>
-                  <p className="mt-0.5 text-sm text-slate-700 dark:text-slate-200">{a.message}</p>
+                  <p className="mt-1 break-words whitespace-normal text-sm leading-5 text-slate-700 dark:text-slate-200">{a.message}</p>
                 </div>
               </div>
             );
@@ -50,9 +50,15 @@ export function AlertBadge({ alerts }: { alerts: AlertItem[] }) {
   const top = alerts[0];
   const c = config[top.type];
   return (
-    <div className={`flex items-center gap-2 rounded-xl ${c.bg} px-3 py-2`}>
-      <c.icon size={16} className={c.color} />
-      <span className="text-sm text-slate-700 dark:text-slate-200 truncate">{top.message}</span>
+    <div className={`flex min-w-0 items-start gap-2.5 rounded-xl ${c.bg} px-3 py-2.5`}>
+      <c.icon size={16} className={`${c.color} mt-0.5 shrink-0`} />
+      <div className="min-w-0 flex-1">
+        <div className="flex flex-wrap items-center gap-x-1.5 gap-y-0.5">
+          <span className={`text-[11px] font-semibold uppercase tracking-wide ${c.color}`}>{c.label}</span>
+          <span className="text-[11px] text-slate-400">· {formatDate(top.date)}</span>
+        </div>
+        <p className="mt-0.5 break-words whitespace-normal text-sm leading-5 text-slate-700 dark:text-slate-200">{top.message}</p>
+      </div>
     </div>
   );
 }

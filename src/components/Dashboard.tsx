@@ -137,14 +137,18 @@ export function Dashboard() {
 
       {/* Alerts banner */}
       {alerts.length > 0 && (
-        <div className="card p-4">
-          <div className="flex items-center gap-2 mb-2">
-            <span className="badge bg-rose-100 text-rose-700 dark:bg-rose-900/40 dark:text-rose-300">{alerts.length} active alert{alerts.length !== 1 ? 's' : ''}</span>
+        <section className="card p-4 sm:p-5" aria-labelledby="active-alerts-heading">
+          <div className="mb-3 flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between">
+            <div>
+              <h2 id="active-alerts-heading" className="text-sm font-semibold text-slate-900 dark:text-white">Active alerts</h2>
+              <p className="mt-0.5 text-xs text-slate-500 dark:text-slate-400">Items that need your attention</p>
+            </div>
+            <span className="badge w-fit bg-rose-100 text-rose-700 dark:bg-rose-900/40 dark:text-rose-300">{alerts.length} active alert{alerts.length !== 1 ? 's' : ''}</span>
           </div>
-          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-2">
+          <div className="grid min-w-0 gap-2.5 sm:grid-cols-2 lg:grid-cols-3">
             {alerts.slice(0, 6).map((a) => <AlertBadge key={a.id} alerts={[a]} />)}
           </div>
-        </div>
+        </section>
       )}
 
       {/* Stats */}
