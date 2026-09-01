@@ -143,14 +143,12 @@ export function generateAlerts(records: BreedingRecord[], doeMap: Map<string, st
         alerts.push({ id: `${r.id}-mk`, type: 'missed-kindling', doeName, date: expected, message: `${doeName} missed kindling (expected ${formatDate(expected)}) — no birth data entered yet`, severity: 'danger' });
       }
     }
-    // Late weaning: kindling actually happened (kits_born > 0), expected weaning
-    // date has passed, but no weaners have actually been recorded yet. Same
-    // reasoning as above — weaning_date is a prediction, not a confirmation.
-    if ((r.kits_born || 0) > 0 && r.kindling_date) {
-      const expectedWean = calcWeaning(r.kindling_date);
-      if (expectedWean && expectedWean < today && (r.weaners_count || 0) === 0) {
-        alerts.push({ id: `${r.id}-lw`, type: 'late-weaning', doeName, date: expectedWean, message: `${doeName} weaning is overdue (due ${formatDate(expectedWean)}) — no weaners recorded yet`, severity: 'warning' });
-      }
+    // Late weaning: only fires off a weaning_date the person actually entered
+    // themselves — never off calcWeaning's auto-predicted date. If no weaning
+    // date was entered (e.g. they only logged a weaners_count and forgot the
+    // date), there is nothing to be "overdue" against, so no alert.
+    if (r.weaning_date && r.weaning_date < today && (r.weaners_count || 0) === 0) {
+      alerts.push({ id: `${r.id}-lw`, type: 'late-weaning', doeName, date: r.weaning_date, message: `${doeName} weaning is overdue (due ${formatDate(r.weaning_date)}) — no weaners recorded yet`, severity: 'warning' });
     }
     // Upcoming remating (within next 7 days)
     if (r.remating_date) {
